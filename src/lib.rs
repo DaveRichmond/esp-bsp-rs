@@ -5,7 +5,8 @@ pub enum BoardType {
     ESP32C6DevKitC1,
     ESP32S3Box,         // HW was discontinued and replaced by ESP32-S3-BOX-3
     M5StackCoreS3,
-    M5StackFire
+    M5StackFire,
+    ESP32CheapYellowDisplay,
 }
 
 pub struct DisplayConfig {
@@ -93,6 +94,17 @@ macro_rules! lcd_gpios {
             $io.pins.gpio27.into_push_pull_output()     // lcd_reset
         )
     };
+    (BoardType::ESP32CheapYellowDisplay, $io:ident) => {
+        (
+            $io.pins.gpio14,    // lcd sclk
+            $io.pins.gpio13,    // lcd mosi
+            $io.pins.gpio15,    // lcd cs
+            $io.pins.gpio12,    // lcd miso
+            $io.pins.gpio2.into_push_pull_output(), // lcd dc
+            $io.pins.gpio21.into_push_pull_output(), // lcd backlight
+            $io.pins.gpio4.into_push_pull_output(), // lcd reset
+        )
+    }
 }
 
 #[macro_export]
@@ -116,12 +128,23 @@ macro_rules! define_display_type {
         >>
     };
     (BoardType::M5StackCoreS3) => {
-        mipidsi::Display<crate::display_interface_spi_dma::SPIInterface<'static, GpioPin<Output<esp32s3_hal::gpio::PushPull>, 35>,
-            GpioPin<Output<esp32s3_hal::gpio::PushPull>, 0>,
-            esp32s3_hal::peripherals::SPI2, esp32s3_hal::gdma::Channel0, FullDuplexMode>,
+        mipidsi::Display<crate::display_interface_spi_dma::SPIInterface<'static, GpioPin<Output<hal::gpio::PushPull>, 35>,
+            GpioPin<Output<hal::gpio::PushPull>, 0>,
+            hal::peripherals::SPI2, esp32s3_hal::gdma::Channel0, FullDuplexMode>,
             mipidsi::models::ILI9342CRgb565,
-            GpioPin<Output<esp32s3_hal::gpio::PushPull>,
+            GpioPin<Output<hal::gpio::PushPull>,
             15
         >>
+    };
+    (BoardType::ESP32CheapYellowDisplay) => {
+        mipidsi::Display<
+            crate::display_interface_spi::SPIInterface<
+                embedded_hal_bus::spi::RefCellDevice<'static,
+                    esp_hal::spi::master::Spi<'static, esp_hal::peripherals::SPI2, esp_hal::spi::FullDuplexMode>, 
+                    esp_hal::gpio::GpioPin<esp_hal::gpio::Output<esp_hal::gpio::PushPull>, 15>, 
+                    embedded_hal_bus::spi::NoDelay>, 
+                esp_hal::gpio::GpioPin<esp_hal::gpio::Output<esp_hal::gpio::PushPull>, 2>>, 
+            mipidsi::models::ILI9341Rgb565, 
+            esp_hal::gpio::GpioPin<esp_hal::gpio::Output<esp_hal::gpio::PushPull>, 4>>   
     };
 }
