@@ -96,13 +96,13 @@ macro_rules! lcd_gpios {
     };
     (BoardType::ESP32CheapYellowDisplay, $io:ident) => {
         (
-            $io.pins.gpio14,    // lcd sclk
-            $io.pins.gpio13,    // lcd mosi
-            $io.pins.gpio15,    // lcd cs
-            $io.pins.gpio12,    // lcd miso
-            $io.pins.gpio2.into_push_pull_output(), // lcd dc
-            $io.pins.gpio21.into_push_pull_output(), // lcd backlight
-            $io.pins.gpio4.into_push_pull_output(), // lcd reset
+            $io.pins.gpio18,    // lcd sclk
+            $io.pins.gpio23,    // lcd mosi
+            $io.pins.gpio5,    // lcd cs
+            $io.pins.gpio19,    // lcd miso
+            $io.pins.gpio22.into_push_pull_output(), // lcd dc
+            $io.pins.gpio4.into_push_pull_output(), // lcd backlight
+            $io.pins.gpio21.into_push_pull_output(), // lcd reset
         )
     }
 }
@@ -141,10 +141,10 @@ macro_rules! define_display_type {
             crate::display_interface_spi::SPIInterface<
                 embedded_hal_bus::spi::RefCellDevice<'static,
                     esp_hal::spi::master::Spi<'static, esp_hal::peripherals::SPI2, esp_hal::spi::FullDuplexMode>, 
-                    esp_hal::gpio::GpioPin<esp_hal::gpio::Output<esp_hal::gpio::PushPull>, 15>, 
+                    esp_hal::gpio::GpioPin<esp_hal::gpio::Output<esp_hal::gpio::PushPull>, 5>, // LCD CS
                     embedded_hal_bus::spi::NoDelay>, 
-                esp_hal::gpio::GpioPin<esp_hal::gpio::Output<esp_hal::gpio::PushPull>, 2>>, 
+                esp_hal::gpio::GpioPin<esp_hal::gpio::Output<esp_hal::gpio::PushPull>, 22>>,  // LCD DC
             mipidsi::models::ILI9341Rgb565, 
-            esp_hal::gpio::GpioPin<esp_hal::gpio::Output<esp_hal::gpio::PushPull>, 4>>   
+            esp_hal::gpio::GpioPin<esp_hal::gpio::Output<esp_hal::gpio::PushPull>, 21>> // LCD RESET
     };
 }
